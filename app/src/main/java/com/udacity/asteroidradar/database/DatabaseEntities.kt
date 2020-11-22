@@ -4,7 +4,8 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.udacity.asteroidradar.domain.Asteroid
+import com.udacity.asteroidradar.domain.AsteroidDetails
+import com.udacity.asteroidradar.domain.AsteroidMain
 
 @Entity
 data class DatabaseAsteroid constructor(
@@ -25,17 +26,26 @@ data class DatabaseAsteroid constructor(
     @ColumnInfo
     val isPotentiallyHazardous: Boolean)
 
-fun List<DatabaseAsteroid>.asDomainModel() : List<Asteroid>{
+fun List<DatabaseAsteroid>.asDomainModelAsteroidMain() : List<AsteroidMain>{
     return map {
-        Asteroid(
+        AsteroidMain(
             id = it.id,
             codename = it.codename,
             closeApproachDate = it.closeApproachDate,
-            absoluteMagnitude = it.absoluteMagnitude,
-            estimatedDiameter = it.estimatedDiameter,
-            relativeVelocity = it.relativeVelocity,
-            distanceFromEarth = it.distanceFromEarth,
             isPotentiallyHazardous = it.isPotentiallyHazardous
         )
     }
+}
+
+fun DatabaseAsteroid.asDomainModelAsteroidDetails() : AsteroidDetails {
+    return AsteroidDetails(
+            id = id,
+            codename = codename,
+            closeApproachDate = closeApproachDate,
+            absoluteMagnitude = absoluteMagnitude,
+            estimatedDiameter = estimatedDiameter,
+            relativeVelocity = relativeVelocity,
+            distanceFromEarth = distanceFromEarth,
+            isPotentiallyHazardous = isPotentiallyHazardous
+        )
 }

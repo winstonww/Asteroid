@@ -6,27 +6,42 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
+import com.udacity.asteroidradar.databinding.MainItemBinding
+import com.udacity.asteroidradar.detail.DetailViewModel
+import com.udacity.asteroidradar.domain.AsteroidMain
+
 
 class MainFragment : Fragment() {
 
-    private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
-    }
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val binding = FragmentMainBinding.inflate(inflater)
         binding.lifecycleOwner = this
 
+        viewModel = ViewModelProvider(this,
+            MainViewModel.Factory(requireActivity().application))
+            .get(MainViewModel::class.java)
+
         binding.viewModel = viewModel
 
         setHasOptionsMenu(true)
 
-        viewModel.asteroids.observe(viewLifecycleOwner, Observer {
+        val adapter = AsteroidAdapter()
+
+        viewModel.asteroidMains.observe(viewLifecycleOwner, Observer {
             Log.i("MainFragment", it.toString())
+            adapter.submitList(it)
         })
+
+
+        binding.asteroidRecycler.adapter = adapter
         return binding.root
     }
 
@@ -39,3 +54,32 @@ class MainFragment : Fragment() {
         return true
     }
 }
+
+class AsteroidAdapter : ListAdapter<AsteroidMain, AsteroidAdapter.ViewHolder>(DiffCallback) {
+
+    class ViewHolder(val binding: MainItemBinding) : RecyclerView.ViewHolder(binding.root)
+
+    companion object DiffCallback : DiffUtil.ItemCallback<AsteroidMain>() {
+        override fun areItemsTheSame(oldItem: AsteroidMain, newItem: AsteroidMain): Boolean {
+            return oldItem === newItem
+        }
+
+        override fun areContentsTheSame(oldItem: AsteroidMain, newItem: AsteroidMain): Boolean {
+            return oldItem.id == newItem.id
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AsteroidAdapter.ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        return ViewHolder(MainItemBinding.inflate(layoutInflater, parent, false))
+    }
+
+    override fun onBindViewHolder(holder: AsteroidAdapter.ViewHolder, position: Int) {
+        holder.binding.asteroid = getItem(position)
+        holder.binding.root.setOnClickListener {
+            MainFragmentDirections.actionShowDetail(getItem(position).id)
+            Log.i("MainFragment", "onClickListener")
+        }
+    }
+}
+

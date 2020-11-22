@@ -1,21 +1,13 @@
 package com.udacity.asteroidradar.main
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.google.gson.JsonElement
-import com.udacity.asteroidradar.api.AsteroidApi
-import com.udacity.asteroidradar.api.NetworkAsteroid
-import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import androidx.lifecycle.*
+import com.udacity.asteroidradar.database.getDatabase
+import com.udacity.asteroidradar.repo.AsteroidRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
 
 enum class LoadStatus {
@@ -24,10 +16,11 @@ enum class LoadStatus {
     ERROR
 }
 
-class MainViewModel : ViewModel() {
-    private var _asteroids = MutableLiveData<ArrayList<NetworkAsteroid>>()
-    val asteroids : LiveData<ArrayList<NetworkAsteroid>>
-        get() = _asteroids
+class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+
+    val repo = AsteroidRepository(getDatabase(application.applicationContext))
+    val asteroidMains = repo.asteroidMains
 
     private var _loadAsteroidsStatus = MutableLiveData<LoadStatus>()
     val loadAsteroidStatus : LiveData<LoadStatus>
@@ -41,10 +34,7 @@ class MainViewModel : ViewModel() {
         currentJob = viewModelScope.launch {
             try {
                 _loadAsteroidsStatus.value = LoadStatus.LOADING
-                _asteroids.value = parseAsteroidsJsonResult(JSONObject(AsteroidApi.service.getAsteroids(
-                    startDate = "2020-11-21",
-                    endDate = "2020-11-28"
-                )))
+                repo.refreshAsteroids()
                 _loadAsteroidsStatus.value = LoadStatus.DONE
 
             } catch (e: IOException) {
@@ -55,7 +45,20 @@ class MainViewModel : ViewModel() {
                 Log.i("MainViewModel", "HttpException: ${e.toString()}")
             }
 
-            Log.i("MainViewModel", _asteroids.value.toString())
+            Log.i("MainViewModel", asteroidMains.value.toString())
+        }
+    }
+
+    /**
+     * Factory for constructing DevByteViewModel with parameter
+     */
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
         }
     }
 }

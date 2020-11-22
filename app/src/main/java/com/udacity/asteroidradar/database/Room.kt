@@ -11,6 +11,9 @@ interface AsteroidDatabseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAsteroids(vararg asteroids: DatabaseAsteroid)
+
+//    @Query("SELECT * FROM databaseasteroid WHERE id = :id")
+//    suspend fun getAsteroidById(id: Long): List<DatabaseAsteroid>
 }
 
 @Database(entities = [DatabaseAsteroid::class], version = 1)
