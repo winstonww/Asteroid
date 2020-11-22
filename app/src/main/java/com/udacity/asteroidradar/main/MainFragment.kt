@@ -6,6 +6,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -33,11 +34,20 @@ class MainFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        val adapter = AsteroidAdapter()
+        val adapter = AsteroidAdapter(OnClick {
+            id -> viewModel.navigateToDetails(id)
+        })
 
         viewModel.asteroidMains.observe(viewLifecycleOwner, Observer {
             Log.i("MainFragment", it.toString())
             adapter.submitList(it)
+        })
+
+        viewModel.navigateDetails.observe(viewLifecycleOwner, Observer { id ->
+            id?.let {
+                findNavController().navigate(MainFragmentDirections.actionShowDetail(id))
+                viewModel.onNavigateToDetailsComplete()
+            }
         })
 
 
@@ -55,7 +65,7 @@ class MainFragment : Fragment() {
     }
 }
 
-class AsteroidAdapter : ListAdapter<AsteroidMain, AsteroidAdapter.ViewHolder>(DiffCallback) {
+class AsteroidAdapter(val clickListener: OnClick) : ListAdapter<AsteroidMain, AsteroidAdapter.ViewHolder>(DiffCallback) {
 
     class ViewHolder(val binding: MainItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -77,9 +87,14 @@ class AsteroidAdapter : ListAdapter<AsteroidMain, AsteroidAdapter.ViewHolder>(Di
     override fun onBindViewHolder(holder: AsteroidAdapter.ViewHolder, position: Int) {
         holder.binding.asteroid = getItem(position)
         holder.binding.root.setOnClickListener {
-            MainFragmentDirections.actionShowDetail(getItem(position).id)
-            Log.i("MainFragment", "onClickListener")
+            clickListener.onClick(getItem(position).id)
         }
+    }
+}
+
+class OnClick(private val action: (id: Long) -> Unit) {
+    fun onClick(id: Long) {
+        action(id)
     }
 }
 

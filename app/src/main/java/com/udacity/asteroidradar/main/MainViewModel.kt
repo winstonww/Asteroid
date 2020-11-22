@@ -26,6 +26,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val loadAsteroidStatus : LiveData<LoadStatus>
         get() = _loadAsteroidsStatus
 
+    private var _navigateDetails = MutableLiveData<Long?>()
+    val navigateDetails : LiveData<Long?>
+        get() = _navigateDetails
+
     private var currentJob : Job? = null
 
 
@@ -46,7 +50,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             Log.i("MainViewModel", asteroidMains.value.toString())
+            _navigateDetails.value = null
         }
+    }
+
+    fun navigateToDetails(id: Long) {
+        _navigateDetails.value = id
+    }
+
+    fun onNavigateToDetailsComplete() {
+        _navigateDetails.value = null
     }
 
     /**
