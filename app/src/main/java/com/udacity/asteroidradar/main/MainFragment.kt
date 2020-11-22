@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
 import com.udacity.asteroidradar.databinding.MainItemBinding
@@ -48,6 +49,12 @@ class MainFragment : Fragment() {
                 findNavController().navigate(MainFragmentDirections.actionShowDetail(id))
                 viewModel.onNavigateToDetailsComplete()
             }
+        })
+
+        // This can be removed cuz we are using DATA BINDING
+        viewModel.imageOfTheDayUrl.observe(viewLifecycleOwner, Observer { s ->
+            Picasso.with(context).load(s).into(binding.activityMainImageOfTheDay)
+            binding.executePendingBindings()
         })
 
 
@@ -89,6 +96,7 @@ class AsteroidAdapter(val clickListener: OnClick) : ListAdapter<AsteroidMain, As
         holder.binding.root.setOnClickListener {
             clickListener.onClick(getItem(position).id)
         }
+        holder.binding.executePendingBindings()
     }
 }
 

@@ -22,7 +22,6 @@ import retrofit2.http.Query
 private val retrofit = Retrofit.Builder()
     .baseUrl(Constants.BASE_URL)
     .addConverterFactory(ScalarsConverterFactory.create())
-//    .addConverterFactory(MoshiConverterFactory.create(moshi))
     .build()
 
 // Example of Query
@@ -35,6 +34,12 @@ interface AsteroidApiService {
         startDate: String,
         @Query("end_date")
         endDate: String,
+        @Query("api_key")
+        apiKey: String = Constants.API_KEY
+    ) : String
+
+    @GET ("planetary/apod")
+    suspend fun getImageOfTheDayUrl(
         @Query("api_key")
         apiKey: String = Constants.API_KEY
     ) : String
