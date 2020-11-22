@@ -34,12 +34,12 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
         }
     }
 
-//    suspend fun getAsteroidById(id: Long) : AsteroidDetails {
-//        val asteroid = withContext(Dispatchers.IO) {
-//             database.dao.getAsteroidById(id).first().asDomainModelAsteroidDetails()
-//        }
-//        return asteroid
-//    }
+    suspend fun getAsteroidById(id: Long) : AsteroidDetails {
+        val asteroid = withContext(Dispatchers.IO) {
+             database.dao.getAsteroidById(id).first().asDomainModelAsteroidDetails()
+        }
+        return asteroid
+    }
 
     fun getStartEndTime() : Array<String> {
         val res : MutableList<String> = mutableListOf()

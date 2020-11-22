@@ -18,7 +18,7 @@ class DetailViewModel(application: Application, asteroidId: Long) : AndroidViewM
 
     init {
         viewModelScope.launch {
-//            _asteroid.value = repo.getAsteroidById(asteroidId)
+            _asteroid.value = repo.getAsteroidById(asteroidId)
         }
     }
     /**
